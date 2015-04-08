@@ -21,7 +21,7 @@ Screen('Preference', 'SkipSyncTests', 1);
 
 %% Experiment Variables.
 scr_background = 127.5;
-scr_no = 1;
+scr_no = 0;
 
 white = WhiteIndex(scr_no);
 black = BlackIndex(scr_no);
@@ -45,7 +45,7 @@ space_key = KbName('space');
 yes_key = KbName('y');
 no_key = KbName('n');
 keyList = zeros(1, 256);
-keyList([yes_key, no_key, left_key, right_key, down_key, esc_key, space_key]) = 1;
+keyList([yes_key, no_key, left_key, right_key, esc_key, space_key]) = 1;
 KbQueueCreate([], keyList); clear keyList
 
 % Sound
@@ -629,24 +629,8 @@ timeSecs = first_press(find(first_press));
 
 end
 
-if isempty(targetInfo)
-    targetInfo = 'Blank';
-end
-
-    
 fprintf(fileID,'%d\t%d\t%s\t%s\t%d\t%d\t%d\t%d\t%d\n', blockLoop, loop, keyresponse, targetInfo, targetPos, targetDir, num_items, reactionTime, displayLoops);
-WaitSecs(0.2);
-
-% give participant feedback
-if (strcmp(targetInfo, 'Red') && strcmp(keyresponse, 'right')) || (strcmp(targetInfo, 'Blue') && strcmp(keyresponse, 'left')) || (strcmp(targetInfo, 'Blank') && strcmp(keyresponse, 'down'))
-    DrawFormattedText(scr, 'Good.', 'center', 'center');
-elseif (strcmp(targetInfo, 'Red') && ~strcmp(keyresponse, 'right')) || (strcmp(targetInfo, 'Blue') && ~strcmp(keyresponse, 'left')) || (strcmp(targetInfo, 'Blank') && ~strcmp(keyresponse, 'down'))
-    DrawFormattedText(scr, 'Wrong.', 'center', 'center');
-elseif strcmp(keyresponse, 'null')
-    DrawFormattedText(scr, 'Too slow.', 'center', 'center');
-end
-Screen('Flip', scr);
-WaitSecs(0.8); 
+ 
 
 end
 
@@ -753,7 +737,6 @@ end
 function [objectElements, targetInfo, target, targetDir] = create_grid(colOption, targetOn, targetColour, num_items)
 targetDir = 0;        
 loopcount = 0;
-targetInfo = '';
 
 %skip_items = [];
 
@@ -863,7 +846,7 @@ end
                 
                     objectcolour = 1;
                     
-                    if target == loopcount && targetOn == 2
+                    if target == loopcount 
                     
                     targetInfo = 'Red';
                     
