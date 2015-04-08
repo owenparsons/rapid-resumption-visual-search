@@ -21,12 +21,11 @@ Screen('Preference', 'SkipSyncTests', 1);
 
 %% Experiment Variables.
 scr_background = 127.5;
-scr_no = 1;
+scr_no = 0;
 
 white = WhiteIndex(scr_no);
 black = BlackIndex(scr_no);
 
-global black white scr_no;
 
 scr_dimensions = Screen('Rect', scr_no);
 
@@ -58,7 +57,7 @@ PsychPortAudio('FillBuffer', pa, bp400);
 % Open Window
 
 scr = Screen('OpenWindow', scr_no, scr_background);
-
+frameRate = 1/Screen('FrameRate', scr);
 HideCursor;
 
 Screen('BlendFunction', scr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -138,7 +137,7 @@ countdown_pause(10, count_text);
 
 %% Shutdown
 fclose(fileID);
-text_string = 'Thank you!'
+text_string = 'Thank you!';
 DrawFormattedText(scr, text_string, 'center', 'center', 0);
 
 Screen('Flip', scr);
@@ -199,7 +198,7 @@ redTargetTrials = randsample(1:trialsNum, (trialsNum / 2));
 
 smallTrials = randsample(1:trialsNum, (trialsNum / 2));
 
-trialCounter = 0
+trialCounter = 0;
     
 for loop = 1:trialsNum
     
@@ -254,7 +253,7 @@ else
 end    
 
 [objectElements, targetInfo, targetPos, targetDir] = create_grid(3, 2, targetColour, num_items);
-blankStart = GetSecs-blankDuration;
+blankStart = GetSecs-blankDuration + 0.05;
 reactionTime = 0;
 
 for displayLoops = 1:8
@@ -263,7 +262,7 @@ baseRect = [0 0 420 420];
 
 centeredRect = CenterRectOnPointd(baseRect, xcen, ycen);
 
-Screen('FillRect', scr, white, centeredRect);    
+Screen('FillRect', scr, white, centeredRect);
     
 objectLoops = size(objectElements,1);
         
@@ -281,7 +280,7 @@ objectLoops = size(objectElements,1);
             
         end
  
-        startSecs = Screen('Flip', scr, blankStart + blankDuration);
+startSecs = Screen('Flip', scr, blankStart + blankDuration - frameRate/2);
         
         if displayLoops == 1
         
@@ -293,26 +292,22 @@ objectLoops = size(objectElements,1);
 
  %startSecs = GetSecs;
  
- KbQueueStart();
+KbQueueStart();
  
- WaitSecs(searchDuration-0.02);
+WaitSecs(searchDuration-0.05);
  
  [ pressed, first_press] = KbQueueCheck;
 timeSecs = first_press(find(first_press));
         if first_press(esc_key)
             error('You interrupted the script by pressing Escape after exposure');
         elseif first_press(left_key)
-            keyresponse = 'left'
+            keyresponse = 'left';
             reactionTime = timeSecs - trialStart;
-            disp(keyresponse);
-            disp(reactionTime);
             
             break;
         elseif first_press(right_key)
-            keyresponse = 'right'
+            keyresponse = 'right';
             reactionTime = timeSecs - trialStart;
-             disp(keyresponse);
-            disp(reactionTime);
             
             break;   
         
@@ -324,29 +319,24 @@ centeredRect = CenterRectOnPointd(baseRect, xcen, ycen);
 
 Screen('FillRect', scr, white, centeredRect);
 
- blankStart = Screen('Flip', scr, startSecs+searchDuration);
+blankStart = Screen('Flip', scr, startSecs+searchDuration - frameRate/2);
 
- WaitSecs(blankDuration - 0.02);
+WaitSecs(blankDuration - 0.05);
  
  [ pressed, first_press] = KbQueueCheck;
 timeSecs = first_press(find(first_press));
         if first_press(esc_key)
             error('You interrupted the script by pressing Escape after exposure');
         elseif first_press(left_key)
-            keyresponse = 'left'
+            keyresponse = 'left';
             reactionTime = timeSecs - trialStart;
-            disp(keyresponse);
-            disp(reactionTime);
             
             break;
         elseif first_press(right_key)
-            keyresponse = 'right'
+            keyresponse = 'right';
             reactionTime = timeSecs - trialStart;
-             disp(keyresponse);
-            disp(reactionTime);
             
             break;    
-        
         end
  
   KbQueueStop;
@@ -355,7 +345,7 @@ timeSecs = first_press(find(first_press));
 end
 
 fprintf(fileID,'%d\t%d\t%s\t%s\t%d\t%d\t%d\t%d\t%d\n', blockLoop, loop, keyresponse, targetInfo, targetPos, targetDir, num_items, reactionTime, displayLoops);
-    
+
 
 end
 
@@ -419,7 +409,7 @@ targetInfo = strcat(targetInfoRed, targetInfoBlue);
 
 searchDuration = 0.1;
 blankDuration = 0.95;
-blankStartB = GetSecs-blankDuration;
+blankStartB = GetSecs-blankDuration+0.02;
 reactionTime = 0;
 
 for displayLoops = 1:8
@@ -446,7 +436,7 @@ objectLoops = size(objectElementsRed,1);
             
         end
         
-  startSecsA = Screen('Flip', scr, blankStartB + blankDuration);
+  startSecsA = Screen('Flip', scr, blankStartB + blankDuration - frameRate/2);
   
   if displayLoops == 1
       
@@ -466,21 +456,21 @@ timeSecs = first_press(find(first_press));
         if first_press(esc_key)
             error('You interrupted the script by pressing Escape after exposure');
         elseif first_press(left_key)
-            keyresponse = 'left'
+            keyresponse = 'left';
             reactionTime = timeSecs - trialStart;
             disp(keyresponse);
             disp(reactionTime);
             
             break;
         elseif first_press(right_key)
-            keyresponse = 'right'
+            keyresponse = 'right';
             reactionTime = timeSecs - trialStart;
              disp(keyresponse);
             disp(reactionTime);
             
             break; 
         elseif first_press(down_key)
-            keyresponse = 'down'
+            keyresponse = 'down';
             reactionTime = timeSecs - trialStart;
              disp(keyresponse);
             disp(reactionTime);
@@ -495,7 +485,7 @@ centeredRect = CenterRectOnPointd(baseRect, xcen, ycen);
 
 Screen('FillRect', scr, white, centeredRect);
 
-blankStartA = Screen('Flip', scr, startSecsA+searchDuration);
+blankStartA = Screen('Flip', scr, startSecsA+searchDuration - frameRate/2);
 
  WaitSecs(blankDuration - 0.02);
  
@@ -504,14 +494,14 @@ timeSecs = first_press(find(first_press));
         if first_press(esc_key)
             error('You interrupted the script by pressing Escape after exposure');
         elseif first_press(left_key)
-            keyresponse = 'left'
+            keyresponse = 'left';
             reactionTime = timeSecs - trialStart;
             disp(keyresponse);
             disp(reactionTime);
             
             break;
         elseif first_press(right_key)
-            keyresponse = 'right'
+            keyresponse = 'right';
             reactionTime = timeSecs - trialStart;
              disp(keyresponse);
             disp(reactionTime);
@@ -519,7 +509,7 @@ timeSecs = first_press(find(first_press));
             break;   
             
            elseif first_press(down_key)
-            keyresponse = 'down'
+            keyresponse = 'down';
             reactionTime = timeSecs - trialStart;
              disp(keyresponse);
             disp(reactionTime);
@@ -556,14 +546,14 @@ timeSecs = first_press(find(first_press));
         if first_press(esc_key)
             error('You interrupted the script by pressing Escape after exposure');
         elseif first_press(left_key)
-            keyresponse = 'left'
+            keyresponse = 'left';
             reactionTime = timeSecs - trialStart;
             disp(keyresponse);
             disp(reactionTime);
             
             break;
         elseif first_press(right_key)
-            keyresponse = 'right'
+            keyresponse = 'right';
             reactionTime = timeSecs - trialStart;
              disp(keyresponse);
             disp(reactionTime);
@@ -571,7 +561,7 @@ timeSecs = first_press(find(first_press));
             break;    
             
             elseif first_press(down_key)
-            keyresponse = 'down'
+            keyresponse = 'down';
             reactionTime = timeSecs - trialStart;
              disp(keyresponse);
             disp(reactionTime);
@@ -595,14 +585,14 @@ timeSecs = first_press(find(first_press));
         if first_press(esc_key)
             error('You interrupted the script by pressing Escape after exposure');
         elseif first_press(left_key)
-            keyresponse = 'left'
+            keyresponse = 'left';
             reactionTime = timeSecs - trialStart;
             disp(keyresponse);
             disp(reactionTime);
             
             break;
         elseif first_press(right_key)
-            keyresponse = 'right'
+            keyresponse = 'right';
             reactionTime = timeSecs - trialStart;
              disp(keyresponse);
             disp(reactionTime);
@@ -610,7 +600,7 @@ timeSecs = first_press(find(first_press));
             break;   
             
            elseif first_press(down_key)
-            keyresponse = 'down'
+            keyresponse = 'down';
             reactionTime = timeSecs - trialStart;
              disp(keyresponse);
             disp(reactionTime);
@@ -707,7 +697,7 @@ else
 
 end
 
-if objectcolour == 0
+            if objectcolour == 0
                 
             objectcolourcode = [0 0 255];
             
@@ -721,8 +711,8 @@ if objectcolour == 0
 allCoords = [xCoords; yCoords];
 lineWidthPix = 4;
 
-disp(objectcolour);
-disp(mid_coords);
+% disp(objectcolour);
+% disp(mid_coords);
 
 
 
@@ -807,7 +797,7 @@ end
             end
             
             
-              if colOption == 2;
+                if colOption == 2;
                 
                 objectcolour = 0;
                 
