@@ -44,3 +44,6 @@ Temporary Items
 
 # Data files
 *.txt
+
+# Matlab autosaves
+*.asv

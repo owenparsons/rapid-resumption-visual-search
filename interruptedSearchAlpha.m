@@ -343,9 +343,20 @@ timeSecs = first_press(find(first_press));
 %KbWait;
 
 end
-
+Screen('Flip', scr);
 fprintf(fileID,'%d\t%d\t%s\t%s\t%d\t%d\t%d\t%d\t%d\n', blockLoop, loop, keyresponse, targetInfo, targetPos, targetDir, num_items, reactionTime, displayLoops);
+WaitSecs(0.2);
 
+% give participant feedback
+if (strcmp(targetInfo, 'Red') && strcmp(keyresponse, 'right')) || (strcmp(targetInfo, 'Blue') && strcmp(keyresponse, 'left'))
+    DrawFormattedText(scr, 'Good.', 'center', 'center');
+elseif (strcmp(targetInfo, 'Red') && strcmp(keyresponse, 'left')) || (strcmp(targetInfo, 'Blue') && strcmp(keyresponse, 'right'))
+    DrawFormattedText(scr, 'Wrong.', 'center', 'center');
+elseif strcmp(keyresponse, 'null')
+    DrawFormattedText(scr, 'Too slow.', 'center', 'center');
+end
+Screen('Flip', scr);
+WaitSecs(0.8);
 
 end
 
