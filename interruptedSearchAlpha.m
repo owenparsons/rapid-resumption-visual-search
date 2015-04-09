@@ -10,7 +10,7 @@ end
 
 tstamp = clock;
 savefile = fullfile(pwd, 'Results', [sprintf('interruptedSearch-%02d-%02d-%02d-%02d-%02d-task-%d-participant-%s', tstamp(1), tstamp(2), tstamp(3), tstamp(4), tstamp(5), taskCondition), ID_num, '.txt']);
-%savefile = fullfile(pwd, 'Results', 'savefile.txt');
+savefilemat = fullfile(pwd, 'Results', [sprintf('interruptedSearch-%02d-%02d-%02d-%02d-%02d-task-%d-participant-%s', tstamp(1), tstamp(2), tstamp(3), tstamp(4), tstamp(5), taskCondition), ID_num, '.mat']);
 
 fileID = fopen(savefile,'wt+');
 
@@ -20,6 +20,12 @@ fprintf(fileID,'Block\tTrial\tCR\tResponse\tPosition\tDirection\tSearchSize\tBla
 Screen('Preference', 'SkipSyncTests', 1);
 
 %% Experiment Variables.
+% save the script content
+data = struct;
+data.scripts = savescripts;
+data.task = taskCondition;
+data.ID = ID_num;
+
 scr_background = 127.5;
 scr_no = 0;
 
@@ -62,6 +68,10 @@ HideCursor;
 Screen('BlendFunction', scr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 Screen('TextFont', scr, 'Ariel');
 Screen('TextSize', scr, 40);
+
+% Experiment Procedure
+nBlocks = 10;
+nTrials = 60;
 
 Priority(1);
 
@@ -165,9 +175,9 @@ countdown_pause(5, count_text);
 
 if taskCondition == 2
 
-   for blockLoop = 1:10 
+   for blockLoop = 1:nBlocks 
     
-   taskB(60);
+   taskB(nTrials);
    
    if taskCondition ~= 10
    
@@ -180,9 +190,9 @@ if taskCondition == 2
    
 elseif taskCondition == 3
     
-    for blockLoop = 1:10 
+    for blockLoop = 1:nBlocks 
     
-   taskA(60, 2); 
+   taskA(nTrials, 2); 
    
    if taskCondition ~= 10
    
@@ -228,15 +238,17 @@ WaitSecs(2);
 KbQueueStop;
 PsychPortAudio('Close');
 sca;
+save(savefilemat, 'data');
 Priority(0);
 disp('All done!');
    
     
 catch errMessage
-      KbQueueStop;
+    KbQueueStop;
     sca;
+    savefilemat = fullfile(pwd, 'Results', 'Errors', [sprintf('interruptedSearch-%02d-%02d-%02d-%02d-%02d-task-%d-participant-%s', tstamp(1), tstamp(2), tstamp(3), tstamp(4), tstamp(5), taskCondition), ID_num, '_error.mat']);
+    save(savefilemat, 'data');
     rethrow(errMessage);
-    
 end
 
 
@@ -281,7 +293,7 @@ else
     
 end
 
-    
+
 fixation_cross;
 
 WaitSecs(0.5);
@@ -399,6 +411,8 @@ timeSecs = first_press(find(first_press));
 
 end
 Screen('Flip', scr);
+
+% Store data in txt file
 fprintf(fileID,'%d\t%d\t%s\t%s\t%d\t%d\t%d\t%d\t%d\n', blockLoop, loop, keyresponse, targetInfo, targetPos, targetDir, num_items, reactionTime, displayLoops);
 WaitSecs(0.2);
 
@@ -412,6 +426,17 @@ elseif strcmp(keyresponse, 'null')
     DrawFormattedText(scr, 'Too slow.', 'center', 'center');
     PsychPortAudio('Start', pa);
 end
+
+% Store data in matlab structure
+data.n = (blockLoop-1)*trialsNum + loop;
+data.keyresponse{data.n} = keyresponse;
+data.rt(data.n) = reactionTime;
+data.correct(data.n) = (strcmp(targetInfo, 'Red') && strcmp(keyresponse, 'right')) || (strcmp(targetInfo, 'Blue') && strcmp(keyresponse, 'left'));
+data.targetcolor{data.n} = targetInfo;
+data.targetpos{data.n} = targetPos;
+data.displaysize(data.n) = num_items;
+data.epoch(data.n) = displayLoops;
+
 Screen('Flip', scr);
 WaitSecs(0.8);
 
@@ -705,7 +730,18 @@ elseif strcmp(keyresponse, 'null')
     PsychPortAudio('Start', pa);
 end
 Screen('Flip', scr);
-WaitSecs(0.8); 
+WaitSecs(0.8);
+
+% Store data in matlab structure
+data.n = (blockLoop-1)*trialsNum + loop;
+data.keyresponse{data.n} = keyresponse;
+data.rt(data.n) = reactionTime;
+data.correct(data.n) = (strcmp(targetInfo, 'Red') && strcmp(keyresponse, 'right')) || (strcmp(targetInfo, 'Blue') && strcmp(keyresponse, 'left')) || (strcmp(targetInfo, 'Blank') && strcmp(keyresponse, 'down'));
+data.targetcolor{data.n} = targetInfo;
+data.targetpos{data.n} = targetPos;
+data.displaysize(data.n) = num_items;
+data.epoch(data.n) = displayLoops;
+
 
 end
 

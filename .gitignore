@@ -48,3 +48,4 @@ Temporary Items
 # Matlab autosaves
 *.asv
 *.m~
+*.mat
