@@ -10,7 +10,7 @@ end
 
 tstamp = clock;
 savefile = fullfile(pwd, 'Results', [sprintf('interruptedSearch-%02d-%02d-%02d-%02d-%02d-task-%d-participant-%s', tstamp(1), tstamp(2), tstamp(3), tstamp(4), tstamp(5), taskCondition), ID_num, '.txt']);
-%savefile = fullfile(pwd, 'Results', 'savefile.txt');
+savefilemat = fullfile(pwd, 'Results', [sprintf('interruptedSearch-%02d-%02d-%02d-%02d-%02d-task-%d-participant-%s', tstamp(1), tstamp(2), tstamp(3), tstamp(4), tstamp(5), taskCondition), ID_num, '.mat']);
 
 fileID = fopen(savefile,'wt+');
 
@@ -20,8 +20,14 @@ fprintf(fileID,'Block\tTrial\tCR\tResponse\tPosition\tDirection\tSearchSize\tBla
 Screen('Preference', 'SkipSyncTests', 1);
 
 %% Experiment Variables.
+% save the script content
+data = struct;
+data.scripts = savescripts;
+data.task = taskCondition;
+data.ID = ID_num;
+
 scr_background = 127.5;
-scr_no = 1;
+scr_no = 0;
 
 white = WhiteIndex(scr_no);
 black = BlackIndex(scr_no);
@@ -55,18 +61,104 @@ bp400 = PsychPortAudio('CreateBuffer', pa, [MakeBeep(400, 0.2); MakeBeep(400, 0.
 PsychPortAudio('FillBuffer', pa, bp400);
 
 % Open Window
-
 scr = Screen('OpenWindow', scr_no, scr_background);
 frameRate = 1/Screen('FrameRate', scr);
 HideCursor;
 
 Screen('BlendFunction', scr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 Screen('TextFont', scr, 'Ariel');
-
-
 Screen('TextSize', scr, 40);
 
+% Experiment Procedure
+nBlocks = 10;
+nTrials = 60;
+
 Priority(1);
+
+
+%% Instructions
+if taskCondition == 1
+    DrawFormattedText(scr, 'Welcome. This experiment is a visual search experiment.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    DrawFormattedText(scr, 'You will have to find a "T" in a range of "L"s.\n\nYou will then have to identify the colour of that "T".', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    DrawFormattedText(scr, 'The T and the Ls can be red or blue.\n\nIf the T is red, you will have to press the "Right" Arrow Key,\n\nand if it is blue, you will have to press the "Left" Arrow Key.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    DrawFormattedText(scr, 'The display will only be shown intermittently, with blank intervals in between.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    DrawFormattedText(scr, 'You have a total of 8 seconds to find the target in each trial.\n\nAfter each trial, you will be told if you got it correct or not.\n\nIf not, a beeping sound will indicate the error.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    [~, ny] = DrawFormattedText(scr, 'This is an example target.\n\nHere, the correct button would be the "Left" Arrow Key.', 'center', 'center', 0);
+    display_object(8, 0, [xcen, ny + 100])
+    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    % Next, a full display
+    DrawFormattedText(scr, 'This is an example of the full display. When you find the target,\n\npress "Right" if it is red,\n\nor "Left" if it is blue.', 'center', 20, 0);
+    baseRect = [0 0 420 420];
+    centeredRect = CenterRectOnPointd(baseRect, xcen, ycen);
+    Screen('FillRect', scr, white, centeredRect);
+    [demoElements] = create_grid(3, 2, 2, 16);
+    for demoObject = 1:16 
+    demotype = cell2mat(demoElements(demoObject,1));
+    democolour = cell2mat(demoElements(demoObject,2));
+    demo_x = cell2mat(demoElements(demoObject,3));
+    demo_y = cell2mat(demoElements(demoObject,4));
+    display_object(demotype, democolour, [demo_x demo_y]);
+    end
+    Screen('Flip', scr);
+    while 1
+        [~, demokeys, ~] = KbStrokeWait;
+        if demokeys(right_key)
+            break
+        else
+            PsychPortAudio('Start', pa);
+        end
+    end
+    
+    DrawFormattedText(scr, 'Great. The aim is to complete the task\n\nas quickly as possible, but also get each answer right.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to start the experiment.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    DrawFormattedText(scr, 'If you have any questions\n\nask the examiner now.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to start the experiment.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    
+elseif taskCondition == 2
+    
+    DrawFormattedText(scr, 'Welcome. This experiment is a visual search experiment.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    DrawFormattedText(scr, 'You will have to find a "T" in a range of either blue or red "L"s.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    DrawFormattedText(scr, 'You will alternately be shown red and blue letters.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    DrawFormattedText(scr, 'If the T is in the red letters, you will have to press the "Right" key.\n\nIf it is in the blue letters, you will have to press the "Left" Key.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    DrawFormattedText(scr, 'On some trials, there will be no T - only Ls.\n\nIn that case, you will have to press the "Down" button.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    DrawFormattedText(scr, 'You have a total of 8 seconds to find the target in each trial.\n\nAfter each trial, you will be told if you got it correct or not.\n\nIf not, a beeping sound will indicate the error.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    [~, ny] = DrawFormattedText(scr, 'This is an example target.\n\nHere, the correct button would be the "Left" Arrow Key.', 'center', 'center', 0);
+    display_object(8, 0, [xcen, ny + 100])
+    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    DrawFormattedText(scr, 'The aim is to complete the task\n\nas quickly as possible, but also get each answer right.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to start the experiment.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    DrawFormattedText(scr, 'If you have any questions\n\nask the examiner now.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to start the experiment.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+end
+
 
 
 
@@ -83,9 +175,9 @@ countdown_pause(5, count_text);
 
 if taskCondition == 2
 
-   for blockLoop = 1:10 
+   for blockLoop = 1:nBlocks 
     
-   taskB(60);
+   taskB(nTrials);
    
    if taskCondition ~= 10
    
@@ -98,9 +190,9 @@ if taskCondition == 2
    
 elseif taskCondition == 3
     
-    for blockLoop = 1:10 
+    for blockLoop = 1:nBlocks 
     
-   taskA(60, 2); 
+   taskA(nTrials, 2); 
    
    if taskCondition ~= 10
    
@@ -146,50 +238,25 @@ WaitSecs(2);
 KbQueueStop;
 PsychPortAudio('Close');
 sca;
+save(savefilemat, 'data');
 Priority(0);
 disp('All done!');
    
     
 catch errMessage
-      KbQueueStop;
+    KbQueueStop;
     sca;
+    savefilemat = fullfile(pwd, 'Results', 'Errors', [sprintf('interruptedSearch-%02d-%02d-%02d-%02d-%02d-task-%d-participant-%s', tstamp(1), tstamp(2), tstamp(3), tstamp(4), tstamp(5), taskCondition), ID_num, '_error.mat']);
+    save(savefilemat, 'data');
     rethrow(errMessage);
-    
 end
 
 
 
 %% Subfunctions
 
-function countdown_pause(time_loop, text_string)
-    
-    image = fullfile(pwd, 'Pictures', sprintf('%d.jpg', randi(50)));
-    temp_image = imread(image, 'jpg');
-    temp_texture = Screen('MakeTexture', scr, temp_image);
-    
-    KbQueueStart;
-    for h = 1:time_loop
-        time_max = time_loop + 1;
-    msg = sprintf('%s %d s', text_string, time_max-h);
-    DrawFormattedText(scr, msg, 'center', 0, 0);
-    Screen('DrawTexture', scr, temp_texture);
-    Screen('Flip', scr);
-    WaitSecs(1);
-        [~, first_press] = KbQueueCheck;
-        if first_press(esc_key)
-            error('You interrupted the script by pressing Escape after exposure');
-        elseif first_press(space_key)
-            break
-        end
-    end
 
-    Screen('Flip', scr);
-    KbQueueStop;
-    RestrictKeysForKbCheck([left_key, right_key, space_key]);
-    WaitSecs(1);
-
-end
-
+%% Task A
 function taskA(trialsNum, altTimings) 
 
 shortTrials = randsample(1:trialsNum, (trialsNum / 2));
@@ -226,7 +293,7 @@ else
     
 end
 
-    
+
 fixation_cross;
 
 WaitSecs(0.5);
@@ -344,17 +411,32 @@ timeSecs = first_press(find(first_press));
 
 end
 Screen('Flip', scr);
+
+% Store data in txt file
 fprintf(fileID,'%d\t%d\t%s\t%s\t%d\t%d\t%d\t%d\t%d\n', blockLoop, loop, keyresponse, targetInfo, targetPos, targetDir, num_items, reactionTime, displayLoops);
 WaitSecs(0.2);
 
 % give participant feedback
 if (strcmp(targetInfo, 'Red') && strcmp(keyresponse, 'right')) || (strcmp(targetInfo, 'Blue') && strcmp(keyresponse, 'left'))
-    DrawFormattedText(scr, 'Good.', 'center', 'center');
+    DrawFormattedText(scr, 'Correct.', 'center', 'center');
 elseif (strcmp(targetInfo, 'Red') && strcmp(keyresponse, 'left')) || (strcmp(targetInfo, 'Blue') && strcmp(keyresponse, 'right'))
     DrawFormattedText(scr, 'Wrong.', 'center', 'center');
+    PsychPortAudio('Start', pa);
 elseif strcmp(keyresponse, 'null')
     DrawFormattedText(scr, 'Too slow.', 'center', 'center');
+    PsychPortAudio('Start', pa);
 end
+
+% Store data in matlab structure
+data.n = (blockLoop-1)*trialsNum + loop;
+data.keyresponse{data.n} = keyresponse;
+data.rt(data.n) = reactionTime;
+data.correct(data.n) = (strcmp(targetInfo, 'Red') && strcmp(keyresponse, 'right')) || (strcmp(targetInfo, 'Blue') && strcmp(keyresponse, 'left'));
+data.targetcolor{data.n} = targetInfo;
+data.targetpos{data.n} = targetPos;
+data.displaysize(data.n) = num_items;
+data.epoch(data.n) = displayLoops;
+
 Screen('Flip', scr);
 WaitSecs(0.8);
 
@@ -362,7 +444,7 @@ end
 
 end
 
-
+%% Task B
 function taskB(trialsNum) 
 
 trialCounter = 0;
@@ -380,7 +462,7 @@ smallTrials = randsample(1:trialsNum, (trialsNum / 2));
     
 for loop = 1:trialsNum
     
-trialCounter = trialCounter + 1;  
+trialCounter = trialCounter + 1;
 
 if isempty(find(smallTrials == trialCounter))
     
@@ -547,7 +629,7 @@ objectLoops = size(objectElementsBlue,1);
             
         end
         
- startSecsB = Screen('Flip', scr, blankStartA + blankDuration);
+ startSecsB = Screen('Flip', scr, blankStartA + blankDuration - frameRate/2);
  
  
  WaitSecs(searchDuration-0.02);
@@ -587,7 +669,7 @@ centeredRect = CenterRectOnPointd(baseRect, xcen, ycen);
 
 Screen('FillRect', scr, white, centeredRect);
 
- blankStartB = Screen('Flip', scr, startSecsB + searchDuration);
+ blankStartB = Screen('Flip', scr, startSecsB + searchDuration - frameRate/2);
 
  WaitSecs(blankDuration-0.02);
  
@@ -639,19 +721,33 @@ WaitSecs(0.2);
 
 % give participant feedback
 if (strcmp(targetInfo, 'Red') && strcmp(keyresponse, 'right')) || (strcmp(targetInfo, 'Blue') && strcmp(keyresponse, 'left')) || (strcmp(targetInfo, 'Blank') && strcmp(keyresponse, 'down'))
-    DrawFormattedText(scr, 'Good.', 'center', 'center');
+    DrawFormattedText(scr, 'Correct.', 'center', 'center');
 elseif (strcmp(targetInfo, 'Red') && ~strcmp(keyresponse, 'right')) || (strcmp(targetInfo, 'Blue') && ~strcmp(keyresponse, 'left')) || (strcmp(targetInfo, 'Blank') && ~strcmp(keyresponse, 'down'))
     DrawFormattedText(scr, 'Wrong.', 'center', 'center');
+    PsychPortAudio('Start', pa);
 elseif strcmp(keyresponse, 'null')
     DrawFormattedText(scr, 'Too slow.', 'center', 'center');
+    PsychPortAudio('Start', pa);
 end
 Screen('Flip', scr);
-WaitSecs(0.8); 
+WaitSecs(0.8);
+
+% Store data in matlab structure
+data.n = (blockLoop-1)*trialsNum + loop;
+data.keyresponse{data.n} = keyresponse;
+data.rt(data.n) = reactionTime;
+data.correct(data.n) = (strcmp(targetInfo, 'Red') && strcmp(keyresponse, 'right')) || (strcmp(targetInfo, 'Blue') && strcmp(keyresponse, 'left')) || (strcmp(targetInfo, 'Blank') && strcmp(keyresponse, 'down'));
+data.targetcolor{data.n} = targetInfo;
+data.targetpos{data.n} = targetPos;
+data.displaysize(data.n) = num_items;
+data.epoch(data.n) = displayLoops;
+
 
 end
 
 end
 
+%% other subfunctions
 function fixation_cross
         
         fixCrossDimPix = 10;
@@ -897,6 +993,34 @@ end
         
     end
 
+function countdown_pause(time_loop, text_string)
+    
+    image = fullfile(pwd, 'Pictures', sprintf('%d.jpg', randi(50)));
+    temp_image = imread(image, 'jpg');
+    temp_texture = Screen('MakeTexture', scr, temp_image);
+    
+    KbQueueStart;
+    for h = 1:time_loop
+        time_max = time_loop + 1;
+    msg = sprintf('%s %d s', text_string, time_max-h);
+    DrawFormattedText(scr, msg, 'center', 0, 0);
+    Screen('DrawTexture', scr, temp_texture);
+    Screen('Flip', scr);
+    WaitSecs(1);
+        [~, first_press] = KbQueueCheck;
+        if first_press(esc_key)
+            error('You interrupted the script by pressing Escape after exposure');
+        elseif first_press(space_key)
+            break
+        end
+    end
+
+    Screen('Flip', scr);
+    KbQueueStop;
+    RestrictKeysForKbCheck([left_key, right_key, space_key]);
+    WaitSecs(1);
+
+end
 
 
 
