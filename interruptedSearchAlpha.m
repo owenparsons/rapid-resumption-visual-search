@@ -10,11 +10,17 @@ end
 
 tstamp = clock;
 savefile = fullfile(pwd, 'Results', [sprintf('interruptedSearch-%02d-%02d-%02d-%02d-%02d-task-%d-participant-%s', tstamp(1), tstamp(2), tstamp(3), tstamp(4), tstamp(5), taskCondition), ID_num, '.txt']);
+savefilenodis = fullfile(pwd, 'Results', [sprintf('interruptedSearch-%02d-%02d-%02d-%02d-%02d-task-%d-participant-%s', tstamp(1), tstamp(2), tstamp(3), tstamp(4), tstamp(5), taskCondition), ID_num, '_NoDis.txt']);
+
 savefilemat = fullfile(pwd, 'Results', [sprintf('interruptedSearch-%02d-%02d-%02d-%02d-%02d-task-%d-participant-%s', tstamp(1), tstamp(2), tstamp(3), tstamp(4), tstamp(5), taskCondition), ID_num, '.mat']);
 
 fileID = fopen(savefile,'wt+');
+noDisfileID = fopen(savefilenodis,'wt+');
 
-fprintf(fileID,'Block\tTrial\tCR\tResponse\tPosition\tDirection\tSearchSize\tBlankStart\tStart\tTime\tEpoch\n');
+fprintf(fileID,'Block\tTrial\tCR\tResponse\tPosition\tDirection\tSearchSize\tTime\tEpoch\n');
+fprintf(noDisfileID,'Trial\tCR\tResponse\tPosition\tDirection\tTime\tEpoch\n');
+
+%fprintf(fileID,'%d\t%d\t%s\t%s\t%d\t%d\t%d\t%d\t%d\n', blockLoop, loop, keyresponse, targetInfo, targetPos, targetDir, num_items, reactionTime, displayLoops);
 
   
 Screen('Preference', 'SkipSyncTests', 1);
@@ -53,6 +59,7 @@ no_key = KbName('n');
 keyList = zeros(1, 256);
 keyList([yes_key, no_key, left_key, right_key, down_key, esc_key, space_key]) = 1;
 KbQueueCreate([], keyList); clear keyList
+RestrictKeysForKbCheck([]);
 
 % Sound
 InitializePsychSound;
@@ -77,7 +84,7 @@ Priority(1);
 
 
 %% Instructions
-if taskCondition == 1
+if taskCondition == 1 || taskCondition == 3
     DrawFormattedText(scr, 'Welcome. This experiment is a visual search experiment.', 'center', 'center', 0);
     DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
     Screen('Flip', scr); KbStrokeWait;
@@ -102,7 +109,7 @@ if taskCondition == 1
     baseRect = [0 0 420 420];
     centeredRect = CenterRectOnPointd(baseRect, xcen, ycen);
     Screen('FillRect', scr, white, centeredRect);
-    [demoElements] = create_grid(3, 2, 2, 16);
+    [demoElements] = create_grid(3, 2, 2, 16, 1);
     for demoObject = 1:16 
     demotype = cell2mat(demoElements(demoObject,1));
     democolour = cell2mat(demoElements(demoObject,2));
@@ -159,9 +166,30 @@ elseif taskCondition == 2
     Screen('Flip', scr); KbStrokeWait;
 end
 
+% Distractor free trials
+
+
+DrawFormattedText(scr, 'Before starting the main experiment, you will do a short warm up task. \n\n\n\n This will be similar to the main task. \n\n However the T will appear on its own without any Ls.', 'center', 'center', 0);
+DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+Screen('Flip', scr); KbStrokeWait;
+DrawFormattedText(scr, 'Press the "Right" key if the T is red or the "Left" key if the T is blue.', 'center', 'center', 0);
+DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+Screen('Flip', scr); KbStrokeWait;
+DrawFormattedText(scr, 'When you are ready to start the warm up, press the "Space" key.', 'center', 'center', 0);
+Screen('Flip', scr); KbStrokeWait;
+
+blockLoop = '88';
+taskA(30, 3, 2);
 
 
 
+
+% Practice trials
+
+    training_demo(taskCondition);
+    DrawFormattedText(scr, 'If you have any questions\n\nask the examiner now.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to start the experiment.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
 
 %% Main body
 
@@ -177,9 +205,9 @@ if taskCondition == 2
 
    for blockLoop = 1:nBlocks 
     
-   taskB(nTrials);
+   taskB(nTrials, 1);
    
-   if taskCondition ~= 10
+   if blockLoop ~= 10
    
    count_text = sprintf('Block %d of 10 is now complete. Pause for', blockLoop);
    countdown_pause(30, count_text);
@@ -192,9 +220,9 @@ elseif taskCondition == 3
     
     for blockLoop = 1:nBlocks 
     
-   taskA(nTrials, 2); 
+   taskA(nTrials, 2, 1); 
    
-   if taskCondition ~= 10
+   if blockLoop ~= 10
    
    count_text = sprintf('Block %d of 10 is now complete. Pause for', blockLoop);
    countdown_pause(30, count_text);
@@ -206,11 +234,11 @@ elseif taskCondition == 3
     
 else
  
-    for blockLoop = 1:3 
+    for blockLoop = 1:nBlocks 
     
-   taskA(10, 1); 
+   taskA(nTrials, 1, 1); 
    
-   if taskCondition ~= 10
+   if blockLoop ~= 10
    
    count_text = sprintf('Block %d of 10 is now complete. Pause for', blockLoop);
    countdown_pause(30, count_text);
@@ -229,6 +257,7 @@ countdown_pause(10, count_text);
 
 %% Shutdown
 fclose(fileID);
+fclose(noDisfileID);
 text_string = 'Thank you!';
 DrawFormattedText(scr, text_string, 'center', 'center', 0);
 
@@ -257,7 +286,7 @@ end
 
 
 %% Task A
-function taskA(trialsNum, altTimings) 
+function taskA(trialsNum, altSettings, writeFile) 
 
 shortTrials = randsample(1:trialsNum, (trialsNum / 2));
 
@@ -298,7 +327,7 @@ fixation_cross;
 
 WaitSecs(0.5);
 
-if altTimings == 2
+if altSettings == 2
     
    if isempty(find(shortTrials == trialCounter)) 
       
@@ -319,7 +348,17 @@ else
     
 end    
 
-[objectElements, targetInfo, targetPos, targetDir] = create_grid(3, 2, targetColour, num_items);
+if altSettings == 3
+    
+    distractorOn = 2;
+    
+else 
+    
+    distractorOn = 1;
+    
+end
+
+[objectElements, targetInfo, targetPos, targetDir] = create_grid(3, 2, targetColour, num_items, distractorOn);
 blankStart = GetSecs-blankDuration + 0.05;
 reactionTime = 0;
 
@@ -358,6 +397,8 @@ startSecs = Screen('Flip', scr, blankStart + blankDuration - frameRate/2);
  keyresponse = 'null';
 
  %startSecs = GetSecs;
+ 
+KbQueueFlush(); 
  
 KbQueueStart();
  
@@ -413,7 +454,18 @@ end
 Screen('Flip', scr);
 
 % Store data in txt file
+if writeFile == 3
+    
+    disp('Not writing to output file!');
+
+elseif writeFile == 2
+
+    fprintf(noDisfileID,'%d\t%s\t%s\t%d\t%d\t%d\t%d\n', loop, keyresponse, targetInfo, targetPos, targetDir, reactionTime, displayLoops);
+
+else
 fprintf(fileID,'%d\t%d\t%s\t%s\t%d\t%d\t%d\t%d\t%d\n', blockLoop, loop, keyresponse, targetInfo, targetPos, targetDir, num_items, reactionTime, displayLoops);
+end
+
 WaitSecs(0.2);
 
 % give participant feedback
@@ -445,7 +497,7 @@ end
 end
 
 %% Task B
-function taskB(trialsNum) 
+function taskB(trialsNum, writeFile) 
 
 trialCounter = 0;
 
@@ -496,8 +548,8 @@ end
 
 
 
-[objectElementsRed, targetInfoRed, targetPos, targetDir] = create_grid(1, targetOptionRed, 2, num_items);
-[objectElementsBlue, targetInfoBlue, targetPos, targetDir] = create_grid(2, targetOptionBlue, 1, num_items);
+[objectElementsRed, targetInfoRed, targetPos, targetDir] = create_grid(1, targetOptionRed, 2, num_items, 1);
+[objectElementsBlue, targetInfoBlue, targetPos, targetDir] = create_grid(2, targetOptionBlue, 1, num_items, 1);
 targetInfo = strcat(targetInfoRed, targetInfoBlue);
 
 searchDuration = 0.1;
@@ -539,6 +591,8 @@ objectLoops = size(objectElementsRed,1);
  
  keyresponse = 'null';
  %startSecs = GetSecs;
+ 
+ KbQueueFlush();
  
  KbQueueStart();
  
@@ -715,8 +769,15 @@ if isempty(targetInfo)
     targetInfo = 'Blank';
 end
 
+if writeFile == 2
     
+    disp('Not writing to output file!');
+    
+else
 fprintf(fileID,'%d\t%d\t%s\t%s\t%d\t%d\t%d\t%d\t%d\n', blockLoop, loop, keyresponse, targetInfo, targetPos, targetDir, num_items, reactionTime, displayLoops);
+end
+
+    
 WaitSecs(0.2);
 
 % give participant feedback
@@ -774,7 +835,13 @@ function display_object(objecttype, objectcolour, mid_coords)
     
 fixCrossDimPix = 10;
 
-if objecttype == 8
+if objecttype == 9
+
+	xCoords = [0 0 0 0];
+	yCoords = [0 0 0 0];
+
+
+elseif objecttype == 8
 
 	xCoords = [-fixCrossDimPix -fixCrossDimPix -fixCrossDimPix fixCrossDimPix];
 	yCoords = [fixCrossDimPix -fixCrossDimPix 0 0];
@@ -846,7 +913,7 @@ Screen('DrawLines', scr, allCoords, lineWidthPix, objectcolourcode, mid_coords, 
 end
 
 
-function [objectElements, targetInfo, target, targetDir] = create_grid(colOption, targetOn, targetColour, num_items)
+function [objectElements, targetInfo, target, targetDir] = create_grid(colOption, targetOn, targetColour, num_items, distractorOn)
 targetDir = 0;        
 loopcount = 0;
 targetInfo = '';
@@ -916,7 +983,15 @@ end
                 
             else
             
+                if distractorOn == 2
+                
+                objecttype = 9;    
+                
+                else
+                    
                 objecttype = randi([1, 4]);
+                
+                end
             
             end
             
@@ -991,13 +1066,106 @@ end
         
         
         
+end
+    
+function training_demo(taskType)
+
+    blockLoop = '99';
+    
+    DrawFormattedText(scr, 'You will now do 10 practice trials before starting the main experiment', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    
+    if taskType == 2
+
+    DrawFormattedText(scr, 'Remember, If the T is in the red letters, you will have to press the "Right" key.\n\nIf it is in the blue letters, you will have to press the "Left" Key.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    
+    DrawFormattedText(scr, 'If you have any questions\n\nask the examiner now.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to start the experiment.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    taskB(10, 2);
+    
+    elseif taskType == 3
+        
+    DrawFormattedText(scr, 'Remember, The T and the Ls can be red or blue.\n\nIf the T is red, you will have to press the "Right" Arrow Key,\n\nand if it is blue, you will have to press the "Left" Arrow Key.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    
+    DrawFormattedText(scr, 'If you have any questions\n\nask the examiner now.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to start the experiment.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    taskA(10, 2, 3);
+        
+    else
+    
+     DrawFormattedText(scr, 'Remember, The T and the Ls can be red or blue.\n\nIf the T is red, you will have to press the "Right" Arrow Key,\n\nand if it is blue, you will have to press the "Left" Arrow Key.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    
+    DrawFormattedText(scr, 'If you have any questions\n\nask the examiner now.', 'center', 'center', 0);
+    DrawFormattedText(scr, 'Press "Space" to start the experiment.', 'center', yfull-80, 0);
+    Screen('Flip', scr); KbStrokeWait;
+    taskA(10, 1, 3);
+        
     end
+    
+    
+    
+    
+
+
+
+    Line1 = 'Do you want to repeat the demo?';
+    dottedline = '------------------------------';
+    Line2 = '(y)es or (n)o?';
+    text_string = sprintf('%s\n%s\n\n%s', Line1, dottedline, Line2);
+    DrawFormattedText(scr, text_string, 'center', 'center', 0);
+    Screen('Flip', scr);
+    
+    
+
+    KbQueueStart();    
+   
+waitTime    = 30;        
+
+startTime = GetSecs();
+pass_var = 0;
+
+while 1
+    
+    keyboard_response = 'null';
+    RestrictKeysForKbCheck([yes_key, no_key]);
+    [ ~, firstPress]=KbQueueCheck;
+    
+    if firstPress(yes_key)
+        RestrictKeysForKbCheck([]);
+        training_demo(taskType);
+        
+    elseif firstPress(no_key)
+        RestrictKeysForKbCheck([]);
+       break
+           
+    elseif GetSecs()-startTime > waitTime
+        RestrictKeysForKbCheck([]);
+       break
+        
+   end
+       
+end
+
+end
+
+
 
 function countdown_pause(time_loop, text_string)
     
     image = fullfile(pwd, 'Pictures', sprintf('%d.jpg', randi(50)));
     temp_image = imread(image, 'jpg');
     temp_texture = Screen('MakeTexture', scr, temp_image);
+    
+    KbQueueFlush();
     
     KbQueueStart;
     for h = 1:time_loop
