@@ -5,7 +5,7 @@ try
 
 if nargin<2
     ID_num = input('Participant ID? ', 's');
-    taskCondition = input('Task condition (1, 2 or 3)? '); 
+    taskCondition = input('Task condition (1, 2, 3 or 4)? '); 
 end
 
 tstamp = clock;
@@ -33,7 +33,7 @@ data.task = taskCondition;
 data.ID = ID_num;
 
 scr_background = 127.5;
-scr_no = 0;
+scr_no = 1;
 
 white = WhiteIndex(scr_no);
 black = BlackIndex(scr_no);
@@ -84,7 +84,7 @@ Priority(1);
 
 
 %% Instructions
-if taskCondition == 1 || taskCondition == 3
+if taskCondition == 1 || taskCondition == 3 || taskCondition == 4
     DrawFormattedText(scr, 'Welcome. This experiment is a visual search experiment.', 'center', 'center', 0);
     DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
     Screen('Flip', scr); KbStrokeWait;
@@ -109,7 +109,7 @@ if taskCondition == 1 || taskCondition == 3
     baseRect = [0 0 420 420];
     centeredRect = CenterRectOnPointd(baseRect, xcen, ycen);
     Screen('FillRect', scr, white, centeredRect);
-    [demoElements] = create_grid(3, 2, 2, 16, 1);
+    [demoElements] = create_grid(3, 2, 2, 16, 1, 999);
     for demoObject = 1:16 
     demotype = cell2mat(demoElements(demoObject,1));
     democolour = cell2mat(demoElements(demoObject,2));
@@ -229,6 +229,21 @@ elseif taskCondition == 3
    
    end
    
+    end
+   
+elseif taskCondition == 4
+    
+    for blockLoop = 1:nBlocks 
+    
+   taskA(nTrials, 4, 1); 
+   
+   if blockLoop ~= 10
+   
+   count_text = sprintf('Block %d of 10 is now complete. Pause for', blockLoop);
+   countdown_pause(30, count_text);
+   
+   end
+   
    end
     
     
@@ -295,12 +310,20 @@ redTargetTrials = randsample(1:trialsNum, (trialsNum / 2));
 smallTrials = randsample(1:trialsNum, (trialsNum / 2));
 
 trialCounter = 0;
+seqLength = 12;
+seqCount = 0;
     
 for loop = 1:trialsNum
     
     
     
 trialCounter = trialCounter + 1;
+seqCount = seqCount + 1;
+
+if seqCount == seqLength
+    seqCount = 0;
+    
+end
 
 if isempty(find(smallTrials == trialCounter))
     
@@ -358,7 +381,17 @@ else
     
 end
 
-[objectElements, targetInfo, targetPos, targetDir] = create_grid(3, 2, targetColour, num_items, distractorOn);
+if altSettings == 4
+    
+    determSeq = seqCount;
+    
+else 
+    
+    determSeq = 999;
+    
+end
+
+[objectElements, targetInfo, targetPos, targetDir] = create_grid(3, 2, targetColour, num_items, distractorOn, determSeq);
 blankStart = GetSecs-blankDuration + 0.05;
 reactionTime = 0;
 
@@ -560,8 +593,8 @@ end
 
 
 
-[objectElementsRed, targetInfoRed, targetPos, targetDir] = create_grid(1, targetOptionRed, 2, num_items, 1);
-[objectElementsBlue, targetInfoBlue, targetPos, targetDir] = create_grid(2, targetOptionBlue, 1, num_items, 1);
+[objectElementsRed, targetInfoRed, targetPos, targetDir] = create_grid(1, targetOptionRed, 2, num_items, 1, 999);
+[objectElementsBlue, targetInfoBlue, targetPos, targetDir] = create_grid(2, targetOptionBlue, 1, num_items, 1, 999);
 targetInfo = strcat(targetInfoRed, targetInfoBlue);
 
 searchDuration = 0.1;
@@ -903,7 +936,11 @@ Screen('DrawLines', scr, allCoords, lineWidthPix, objectcolourcode, mid_coords, 
 end
 
 
-function [objectElements, targetInfo, target, targetDir] = create_grid(colOption, targetOn, targetColour, num_items, distractorOn)
+function [objectElements, targetInfo, target, targetDir] = create_grid(colOption, targetOn, targetColour, num_items, distractorOn, determSeq)
+safeCheck = 1;
+
+while safeCheck == 1
+
 targetDir = 0;        
 loopcount = 0;
 targetInfo = '';
@@ -944,6 +981,43 @@ else
     target = randsample(blueitems, 1);
     
 end
+
+if determSeq ~= 999
+
+        seqOrder = read_mixed_csv('s_file.csv',',');
+        
+        quartVal = seqOrder{determSeq,1};
+        quartNum = str2num(quartVal);
+        disp(quartNum);
+        
+        quartArrayOne = [1 2 3 7 8 9 13 14 15];
+        quartArrayTwo = [4 5 6 10 11 12 16 17 18];
+        quartArrayThree = [19 20 21 25 26 27 31 32 33];
+        quartArrayFour = [22 23 24 28 29 30 34 35 36];
+        
+        if quartNum == 1
+            
+            target = randsample(quartArrayOne, 1);
+        
+        elseif quartNum == 2
+            
+            target = randsample(quartArrayTwo, 1);
+            
+        elseif quartNum == 3
+            
+            target = randsample(quartArrayThree, 1);
+            
+        else   
+            
+            target = randsample(quartArrayFour, 1);
+            
+        end
+    
+    
+    
+end
+
+if isempty(find(skip_items == target))
         
         for rows = 1:6
          
@@ -1054,8 +1128,14 @@ end
             end
         end
         
+safeCheck = 0;        
         
+end
+
+   
         
+end
+
 end
     
 function training_demo(taskType)
@@ -1101,6 +1181,7 @@ function training_demo(taskType)
         
     end
     
+
     
     
     
@@ -1146,6 +1227,30 @@ while 1
 end
 
 end
+
+function lineArray = read_mixed_csv(fileName,delimiter)
+  fid = fopen(fileName,'r');   
+  lineArray = cell(100,1);     
+                               
+  lineIndex = 1;               
+  nextLine = fgetl(fid);       
+  while ~isequal(nextLine,-1)         
+    lineArray{lineIndex} = nextLine;  
+    lineIndex = lineIndex+1;          
+    nextLine = fgetl(fid);            
+  end
+  fclose(fid);                 
+  lineArray = lineArray(1:lineIndex-1);  
+  for iLine = 1:lineIndex-1              
+    lineData = textscan(lineArray{iLine},'%s',...  
+                        'Delimiter',delimiter);
+    lineData = lineData{1};              
+    if strcmp(lineArray{iLine}(end),delimiter)  
+      lineData{end+1} = '';                     
+    end
+    lineArray(iLine,1:numel(lineData)) = lineData;  
+  end
+end  
 
 
 
