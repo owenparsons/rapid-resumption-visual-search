@@ -82,93 +82,93 @@ Screen('TextSize', scr, 40);
 
 % Experiment Procedure
 nBlocks = 10;
-nTrials = 48;
+nTrials = 45;
 
 Priority(1);
 
 
 %% Instructions
-if taskCondition == 1 || taskCondition == 3 || taskCondition == 4
-    DrawFormattedText(scr, 'Welcome. This experiment is a visual search experiment.', 'center', 'center', 0);
-    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
-    Screen('Flip', scr); KbStrokeWait;
-    DrawFormattedText(scr, 'You will have to find a "T" in a range of "L"s.\n\nYou will then have to identify the colour of that "T".', 'center', 'center', 0);
-    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
-    Screen('Flip', scr); KbStrokeWait;
-    DrawFormattedText(scr, 'The T and the Ls can be red or blue.\n\nIf the T is red, you will have to press the "Right" Arrow Key,\n\nand if it is blue, you will have to press the "Left" Arrow Key.', 'center', 'center', 0);
-    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
-    Screen('Flip', scr); KbStrokeWait;
-    DrawFormattedText(scr, 'The display will only be shown intermittently, with blank intervals in between.', 'center', 'center', 0);
-    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
-    Screen('Flip', scr); KbStrokeWait;
-    DrawFormattedText(scr, 'You have a total of 8 seconds to find the target in each trial.\n\nAfter each trial, you will be told if you got it correct or not.\n\nIf not, a beeping sound will indicate the error.', 'center', 'center', 0);
-    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
-    Screen('Flip', scr); KbStrokeWait;
-    [~, ny] = DrawFormattedText(scr, 'This is an example target.\n\nHere, the correct button would be the "Left" Arrow Key.', 'center', 'center', 0);
-    display_object(8, 0, [xcen, ny + 100])
-    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
-    Screen('Flip', scr); KbStrokeWait;
-    % Next, a full display
-    DrawFormattedText(scr, 'This is an example of the full display. When you find the target,\n\npress "Right" if it is red,\n\nor "Left" if it is blue.', 'center', 20, 0);
-    baseRect = [0 0 420 420];
-    centeredRect = CenterRectOnPointd(baseRect, xcen, ycen);
-    Screen('FillRect', scr, white, centeredRect);
-    [demoElements] = create_grid(3, 2, 2, 16, 1, 999);
-    for demoObject = 1:16
-    demotype = cell2mat(demoElements(demoObject,1));
-    democolour = cell2mat(demoElements(demoObject,2));
-    demo_x = cell2mat(demoElements(demoObject,3));
-    demo_y = cell2mat(demoElements(demoObject,4));
-    display_object(demotype, democolour, [demo_x demo_y]);
-    end
-    Screen('Flip', scr);
-    while 1
-        [~, demokeys, ~] = KbStrokeWait;
-        if demokeys(right_key)
-            break
-        else
-            PsychPortAudio('Start', pa);
-        end
-    end
-
-    DrawFormattedText(scr, 'Great. The aim is to complete the task\n\nas quickly as possible, but also get each answer right.', 'center', 'center', 0);
-    DrawFormattedText(scr, 'Press "Space" to start the experiment.', 'center', yfull-80, 0);
-    Screen('Flip', scr); KbStrokeWait;
-    DrawFormattedText(scr, 'If you have any questions\n\nask the examiner now.', 'center', 'center', 0);
-    DrawFormattedText(scr, 'Press "Space" to start the experiment.', 'center', yfull-80, 0);
-    Screen('Flip', scr); KbStrokeWait;
-
-elseif taskCondition == 2
-
-    DrawFormattedText(scr, 'Welcome. This experiment is a visual search experiment.', 'center', 'center', 0);
-    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
-    Screen('Flip', scr); KbStrokeWait;
-    DrawFormattedText(scr, 'You will have to find a "T" in a range of either blue or red "L"s.', 'center', 'center', 0);
-    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
-    Screen('Flip', scr); KbStrokeWait;
-    DrawFormattedText(scr, 'You will alternately be shown red and blue letters.', 'center', 'center', 0);
-    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
-    Screen('Flip', scr); KbStrokeWait;
-    DrawFormattedText(scr, 'If the T is in the red letters, you will have to press the "Right" key.\n\nIf it is in the blue letters, you will have to press the "Left" Key.', 'center', 'center', 0);
-    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
-    Screen('Flip', scr); KbStrokeWait;
-    DrawFormattedText(scr, 'On some trials, there will be no T - only Ls.\n\nIn that case, you will have to press the "Down" button.', 'center', 'center', 0);
-    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
-    Screen('Flip', scr); KbStrokeWait;
-    DrawFormattedText(scr, 'You have a total of 8 seconds to find the target in each trial.\n\nAfter each trial, you will be told if you got it correct or not.\n\nIf not, a beeping sound will indicate the error.', 'center', 'center', 0);
-    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
-    Screen('Flip', scr); KbStrokeWait;
-    [~, ny] = DrawFormattedText(scr, 'This is an example target.\n\nHere, the correct button would be the "Left" Arrow Key.', 'center', 'center', 0);
-    display_object(8, 0, [xcen, ny + 100])
-    DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
-    Screen('Flip', scr); KbStrokeWait;
-    DrawFormattedText(scr, 'The aim is to complete the task\n\nas quickly as possible, but also get each answer right.', 'center', 'center', 0);
-    DrawFormattedText(scr, 'Press "Space" to start the experiment.', 'center', yfull-80, 0);
-    Screen('Flip', scr); KbStrokeWait;
-    DrawFormattedText(scr, 'If you have any questions\n\nask the examiner now.', 'center', 'center', 0);
-    DrawFormattedText(scr, 'Press "Space" to start the experiment.', 'center', yfull-80, 0);
-    Screen('Flip', scr); KbStrokeWait;
-end
+% if taskCondition == 1 || taskCondition == 3 || taskCondition == 4
+%     DrawFormattedText(scr, 'Welcome. This experiment is a visual search experiment.', 'center', 'center', 0);
+%     DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+%     Screen('Flip', scr); KbStrokeWait;
+%     DrawFormattedText(scr, 'You will have to find a "T" in a range of "L"s.\n\nYou will then have to identify the colour of that "T".', 'center', 'center', 0);
+%     DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+%     Screen('Flip', scr); KbStrokeWait;
+%     DrawFormattedText(scr, 'The T and the Ls can be red or blue.\n\nIf the T is red, you will have to press the "Right" Arrow Key,\n\nand if it is blue, you will have to press the "Left" Arrow Key.', 'center', 'center', 0);
+%     DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+%     Screen('Flip', scr); KbStrokeWait;
+%     DrawFormattedText(scr, 'The display will only be shown intermittently, with blank intervals in between.', 'center', 'center', 0);
+%     DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+%     Screen('Flip', scr); KbStrokeWait;
+%     DrawFormattedText(scr, 'You have a total of 8 seconds to find the target in each trial.\n\nAfter each trial, you will be told if you got it correct or not.\n\nIf not, a beeping sound will indicate the error.', 'center', 'center', 0);
+%     DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+%     Screen('Flip', scr); KbStrokeWait;
+%     [~, ny] = DrawFormattedText(scr, 'This is an example target.\n\nHere, the correct button would be the "Left" Arrow Key.', 'center', 'center', 0);
+%     display_object(8, 0, [xcen, ny + 100])
+%     DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+%     Screen('Flip', scr); KbStrokeWait;
+%     % Next, a full display
+%     DrawFormattedText(scr, 'This is an example of the full display. When you find the target,\n\npress "Right" if it is red,\n\nor "Left" if it is blue.', 'center', 20, 0);
+%     baseRect = [0 0 420 420];
+%     centeredRect = CenterRectOnPointd(baseRect, xcen, ycen);
+%     Screen('FillRect', scr, white, centeredRect);
+%     [demoElements] = create_grid(3, 2, 2, 16, 1, 999);
+%     for demoObject = 1:16
+%     demotype = cell2mat(demoElements(demoObject,1));
+%     democolour = cell2mat(demoElements(demoObject,2));
+%     demo_x = cell2mat(demoElements(demoObject,3));
+%     demo_y = cell2mat(demoElements(demoObject,4));
+%     display_object(demotype, democolour, [demo_x demo_y]);
+%     end
+%     Screen('Flip', scr);
+%     while 1
+%         [~, demokeys, ~] = KbStrokeWait;
+%         if demokeys(right_key)
+%             break
+%         else
+%             PsychPortAudio('Start', pa);
+%         end
+%     end
+% 
+%     DrawFormattedText(scr, 'Great. The aim is to complete the task\n\nas quickly as possible, but also get each answer right.', 'center', 'center', 0);
+%     DrawFormattedText(scr, 'Press "Space" to start the experiment.', 'center', yfull-80, 0);
+%     Screen('Flip', scr); KbStrokeWait;
+%     DrawFormattedText(scr, 'If you have any questions\n\nask the examiner now.', 'center', 'center', 0);
+%     DrawFormattedText(scr, 'Press "Space" to start the experiment.', 'center', yfull-80, 0);
+%     Screen('Flip', scr); KbStrokeWait;
+% 
+% elseif taskCondition == 2
+% 
+%     DrawFormattedText(scr, 'Welcome. This experiment is a visual search experiment.', 'center', 'center', 0);
+%     DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+%     Screen('Flip', scr); KbStrokeWait;
+%     DrawFormattedText(scr, 'You will have to find a "T" in a range of either blue or red "L"s.', 'center', 'center', 0);
+%     DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+%     Screen('Flip', scr); KbStrokeWait;
+%     DrawFormattedText(scr, 'You will alternately be shown red and blue letters.', 'center', 'center', 0);
+%     DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+%     Screen('Flip', scr); KbStrokeWait;
+%     DrawFormattedText(scr, 'If the T is in the red letters, you will have to press the "Right" key.\n\nIf it is in the blue letters, you will have to press the "Left" Key.', 'center', 'center', 0);
+%     DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+%     Screen('Flip', scr); KbStrokeWait;
+%     DrawFormattedText(scr, 'On some trials, there will be no T - only Ls.\n\nIn that case, you will have to press the "Down" button.', 'center', 'center', 0);
+%     DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+%     Screen('Flip', scr); KbStrokeWait;
+%     DrawFormattedText(scr, 'You have a total of 8 seconds to find the target in each trial.\n\nAfter each trial, you will be told if you got it correct or not.\n\nIf not, a beeping sound will indicate the error.', 'center', 'center', 0);
+%     DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+%     Screen('Flip', scr); KbStrokeWait;
+%     [~, ny] = DrawFormattedText(scr, 'This is an example target.\n\nHere, the correct button would be the "Left" Arrow Key.', 'center', 'center', 0);
+%     display_object(8, 0, [xcen, ny + 100])
+%     DrawFormattedText(scr, 'Press "Space" to continue.', 'center', yfull-80, 0);
+%     Screen('Flip', scr); KbStrokeWait;
+%     DrawFormattedText(scr, 'The aim is to complete the task\n\nas quickly as possible, but also get each answer right.', 'center', 'center', 0);
+%     DrawFormattedText(scr, 'Press "Space" to start the experiment.', 'center', yfull-80, 0);
+%     Screen('Flip', scr); KbStrokeWait;
+%     DrawFormattedText(scr, 'If you have any questions\n\nask the examiner now.', 'center', 'center', 0);
+%     DrawFormattedText(scr, 'Press "Space" to start the experiment.', 'center', yfull-80, 0);
+%     Screen('Flip', scr); KbStrokeWait;
+% end
 
 %% Distractor free trials
 
@@ -446,11 +446,11 @@ objectLoops = size(objectElements,1);
 if altSettings == 5
 
     if trials_vector(loop) == 2
-            Switch_type = 'Target'
+            Switch_type = 'Target';
     elseif trials_vector(loop) == 3
-            Switch_type = 'All'
+            Switch_type = 'All';
     else
-            Switch_type = 'None'
+            Switch_type = 'None';
     end
 
 
@@ -463,9 +463,9 @@ if altSettings == 5
             colour_switch = 1;
             if objecttype < 9 && objecttype > 4
                  if objectcolour == 1
-                     newobjectcolour = 0
+                     newobjectcolour = 0;
                  else
-                     newobjectcolour = 1
+                     newobjectcolour = 1;
                  end
 
 
@@ -477,9 +477,9 @@ if altSettings == 5
             end
         elseif trials_vector(loop) == 3
             if objectcolour == 1
-                     newobjectcolour = 0
+                     newobjectcolour = 0;
                  else
-                     newobjectcolour = 1
+                     newobjectcolour = 1;
             end
 
             colour_switch = 1;
@@ -641,7 +641,7 @@ trialCounter = 0;
 
 downTrialsNumber = trialsNum / 5;
 redTrialsNumber = (trialsNum - downTrialsNumber) / 2;
-downTrials = randsample(1:trialsNum, downTrialsNumber);
+downTrials = randsample(trialsNum, downTrialsNumber);
 
 emptyTrials = setdiff(1:trialsNum, downTrials);
 redTrials = randsample(emptyTrials, redTrialsNumber);
@@ -690,6 +690,23 @@ end
 [objectElementsBlue, targetInfoBlue, targetPos, targetDir] = create_grid(2, targetOptionBlue, 1, num_items, 1, 999);
 targetInfo = strcat(targetInfoRed, targetInfoBlue);
 
+display = struct([]);
+for iDisplay = 1:8
+    display(iDisplay).xy = zeros(2, 4*size(objectElementsRed, 1));
+    
+    for object = 1:size(objectElementsRed, 1);
+        objecttype = cell2mat(objectElementsRed(object,1));
+        objectcolour = cell2mat(objectElementsRed(object,2));
+        mid_coords = [objectElementsRed{object,3}, objectElementsRed{object,4}];
+        display(iDisplay).xy(1:2, (4*object-3):(4*object)) = make_object_xy(objecttype, objectcolour, mid_coords);
+        if objectcolour == 0
+            display(iDisplay).colors(1:3, (4*object-3):(4*object)) = repmat([0;0;255], 1, 4);
+        else
+            display(iDisplay).colors(1:3, (4*object-3):(4*object)) = repmat([255;0;0], 1, 4);
+        end
+    end
+end
+
 searchDuration = 0.1;
 blankDuration = 0.95;
 blankStartB = GetSecs-blankDuration+0.02;
@@ -703,23 +720,9 @@ centeredRect = CenterRectOnPointd(baseRect, xcen, ycen);
 
 Screen('FillRect', scr, white, centeredRect);
 
-objectLoops = size(objectElementsRed,1);
+Screen('DrawLines', scr, display(displayLoops).xy, 4, display(displayLoops).colors, [], 2);
 
-        for displayObject = 1:objectLoops
-
-            objecttype = cell2mat(objectElementsRed(displayObject,1));
-            objectcolour = cell2mat(objectElementsRed(displayObject,2));
-            x_final = cell2mat(objectElementsRed(displayObject,3));
-            y_final = cell2mat(objectElementsRed(displayObject,4));
-
-
-
-            display_object(objecttype, objectcolour, [x_final y_final]);
-
-
-        end
-
-  startSecsA = Screen('Flip', scr, blankStartB + blankDuration - frameRate/2);
+startSecsA = Screen('Flip', scr, blankStartB + blankDuration - frameRate/2);
 
   if displayLoops == 1
 
