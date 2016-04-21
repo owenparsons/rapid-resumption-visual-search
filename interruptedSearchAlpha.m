@@ -22,11 +22,11 @@ fprintf(noDisfileID,'Trial\tCR\tResponse\tPosition\tDirection\tTime\tEpoch\n');
 
 %fprintf(fileID,'%d\t%d\t%s\t%s\t%d\t%d\t%d\t%d\t%d\n', blockLoop, loop, keyresponse, targetInfo, targetPos, targetDir, num_items, reactionTime, displayLoops);
 
-  
-Screen('Preference', 'SkipSyncTests', 1);
+% Screen('Preference', 'SkipSyncTests', 1);
 
 %% Experiment Variables.
 % save the script content
+nosearchdata = struct;
 data = struct;
 data.scripts = savescripts;
 data.task = taskCondition;
@@ -166,7 +166,7 @@ elseif taskCondition == 2
     Screen('Flip', scr); KbStrokeWait;
 end
 
-% Distractor free trials
+%% Distractor free trials
 
 
 DrawFormattedText(scr, 'Before starting the main experiment, you will do a short warm up task. \n\n\n\n This will be similar to the main task. \n\n However the T will appear on its own without any Ls.', 'center', 'center', 0);
@@ -184,7 +184,7 @@ taskA(30, 3, 2);
 
 
 
-% Practice trials
+%% Practice trials
 
     training_demo(taskCondition);
     DrawFormattedText(scr, 'If you have any questions\n\nask the examiner now.', 'center', 'center', 0);
@@ -282,7 +282,7 @@ WaitSecs(2);
 KbQueueStop;
 PsychPortAudio('Close');
 sca;
-save(savefilemat, 'data');
+save(savefilemat, 'data', 'nosearchdata');
 Priority(0);
 disp('All done!');
    
@@ -291,7 +291,7 @@ catch errMessage
     KbQueueStop;
     sca;
     savefilemat = fullfile(pwd, 'Results', 'Errors', [sprintf('interruptedSearch-%02d-%02d-%02d-%02d-%02d-task-%d-participant-%s', tstamp(1), tstamp(2), tstamp(3), tstamp(4), tstamp(5), taskCondition), ID_num, '_error.mat']);
-    save(savefilemat, 'data');
+    save(savefilemat, 'data', 'nosearchdata');
     rethrow(errMessage);
 end
 
@@ -437,16 +437,16 @@ KbQueueStart();
  
 WaitSecs(searchDuration-0.05);
  
- [ pressed, first_press] = KbQueueCheck;
-timeSecs = first_press(find(first_press));
+ [ ~, first_press] = KbQueueCheck;
+timeSecs = min(first_press(first_press~=0));
         if first_press(esc_key)
             error('You interrupted the script by pressing Escape after exposure');
-        elseif first_press(left_key)
+        elseif ~isempty(timeSecs) && first_press(left_key)==timeSecs
             keyresponse = 'left';
             reactionTime = timeSecs - trialStart;
             
             break;
-        elseif first_press(right_key)
+        elseif ~isempty(timeSecs) && first_press(right_key)==timeSecs
             keyresponse = 'right';
             reactionTime = timeSecs - trialStart;
             
@@ -464,20 +464,21 @@ blankStart = Screen('Flip', scr, startSecs+searchDuration - frameRate/2);
 
 WaitSecs(blankDuration - 0.05);
  
- [ pressed, first_press] = KbQueueCheck;
-timeSecs = first_press(find(first_press));
+ [ ~, first_press] = KbQueueCheck;
+timeSecs = min(first_press(first_press~=0));
         if first_press(esc_key)
             error('You interrupted the script by pressing Escape after exposure');
-        elseif first_press(left_key)
+        elseif ~isempty(timeSecs) && first_press(left_key)==timeSecs
             keyresponse = 'left';
             reactionTime = timeSecs - trialStart;
             
             break;
-        elseif first_press(right_key)
+        elseif ~isempty(timeSecs) && first_press(right_key)==timeSecs
             keyresponse = 'right';
             reactionTime = timeSecs - trialStart;
             
-            break;    
+            break;   
+        
         end
  
   KbQueueStop;
@@ -513,6 +514,7 @@ elseif strcmp(keyresponse, 'null')
 end
 
 % Store data in matlab structure
+if isnumeric(blockLoop)
 data.n = (blockLoop-1)*trialsNum + loop;
 data.keyresponse{data.n} = keyresponse;
 data.rt(data.n) = reactionTime;
@@ -521,6 +523,16 @@ data.targetcolor{data.n} = targetInfo;
 data.targetpos{data.n} = targetPos;
 data.displaysize(data.n) = num_items;
 data.epoch(data.n) = displayLoops;
+elseif strcmp(blockLoop, '88')
+nosearchdata.n = loop;
+nosearchdata.keyresponse{nosearchdata.n} = keyresponse;
+nosearchdata.rt(nosearchdata.n) = reactionTime;
+nosearchdata.correct(nosearchdata.n) = (strcmp(targetInfo, 'Red') && strcmp(keyresponse, 'right')) || (strcmp(targetInfo, 'Blue') && strcmp(keyresponse, 'left'));
+nosearchdata.targetcolor{nosearchdata.n} = targetInfo;
+nosearchdata.targetpos{nosearchdata.n} = targetPos;
+nosearchdata.displaysize(nosearchdata.n) = num_items;
+nosearchdata.epoch(nosearchdata.n) = displayLoops;
+end
 
 Screen('Flip', scr);
 WaitSecs(0.8);
@@ -631,31 +643,26 @@ objectLoops = size(objectElementsRed,1);
  
  WaitSecs(searchDuration-0.02);
  
- [ pressed, first_press] = KbQueueCheck;
-timeSecs = first_press(find(first_press));
+[ ~, first_press] = KbQueueCheck;
+timeSecs = min(first_press(first_press~=0));
         if first_press(esc_key)
             error('You interrupted the script by pressing Escape after exposure');
-        elseif first_press(left_key)
+        elseif ~isempty(timeSecs) && first_press(left_key)==timeSecs
             keyresponse = 'left';
             reactionTime = timeSecs - trialStart;
-            disp(keyresponse);
-            disp(reactionTime);
             
             break;
-        elseif first_press(right_key)
+        elseif ~isempty(timeSecs) && first_press(right_key)==timeSecs
             keyresponse = 'right';
             reactionTime = timeSecs - trialStart;
-             disp(keyresponse);
-            disp(reactionTime);
             
-            break; 
-        elseif first_press(down_key)
+            break;
+        
+        elseif ~isempty(timeSecs) && first_press(down_key)==timeSecs
             keyresponse = 'down';
             reactionTime = timeSecs - trialStart;
-             disp(keyresponse);
-            disp(reactionTime);
             
-            break; 
+            break;
         
         end
 
@@ -669,30 +676,24 @@ blankStartA = Screen('Flip', scr, startSecsA+searchDuration - frameRate/2);
 
  WaitSecs(blankDuration - 0.02);
  
- [ pressed, first_press] = KbQueueCheck;
-timeSecs = first_press(find(first_press));
+  [ ~, first_press] = KbQueueCheck;
+timeSecs = min(first_press(first_press~=0));
         if first_press(esc_key)
             error('You interrupted the script by pressing Escape after exposure');
-        elseif first_press(left_key)
+        elseif ~isempty(timeSecs) && first_press(left_key)==timeSecs
             keyresponse = 'left';
             reactionTime = timeSecs - trialStart;
-            disp(keyresponse);
-            disp(reactionTime);
             
             break;
-        elseif first_press(right_key)
+        elseif ~isempty(timeSecs) && first_press(right_key)==timeSecs
             keyresponse = 'right';
             reactionTime = timeSecs - trialStart;
-             disp(keyresponse);
-            disp(reactionTime);
             
             break;   
-            
-           elseif first_press(down_key)
+        
+        elseif ~isempty(timeSecs) && first_press(down_key)==timeSecs
             keyresponse = 'down';
             reactionTime = timeSecs - trialStart;
-             disp(keyresponse);
-            disp(reactionTime);
             
             break; 
         
@@ -721,30 +722,24 @@ objectLoops = size(objectElementsBlue,1);
  
  WaitSecs(searchDuration-0.02);
  
-  [ pressed, first_press] = KbQueueCheck;
-timeSecs = first_press(find(first_press));
+[ ~, first_press] = KbQueueCheck;
+timeSecs = min(first_press(first_press~=0));
         if first_press(esc_key)
             error('You interrupted the script by pressing Escape after exposure');
-        elseif first_press(left_key)
+        elseif ~isempty(timeSecs) && first_press(left_key)==timeSecs
             keyresponse = 'left';
             reactionTime = timeSecs - trialStart;
-            disp(keyresponse);
-            disp(reactionTime);
             
             break;
-        elseif first_press(right_key)
+        elseif ~isempty(timeSecs) && first_press(right_key)==timeSecs
             keyresponse = 'right';
             reactionTime = timeSecs - trialStart;
-             disp(keyresponse);
-            disp(reactionTime);
             
-            break;    
-            
-            elseif first_press(down_key)
+            break;   
+        
+        elseif ~isempty(timeSecs) && first_press(down_key)==timeSecs
             keyresponse = 'down';
             reactionTime = timeSecs - trialStart;
-             disp(keyresponse);
-            disp(reactionTime);
             
             break; 
         
@@ -760,30 +755,24 @@ Screen('FillRect', scr, white, centeredRect);
 
  WaitSecs(blankDuration-0.02);
  
- [ pressed, first_press] = KbQueueCheck;
-timeSecs = first_press(find(first_press));
+[ ~, first_press] = KbQueueCheck;
+timeSecs = min(first_press(first_press~=0));
         if first_press(esc_key)
             error('You interrupted the script by pressing Escape after exposure');
-        elseif first_press(left_key)
+        elseif ~isempty(timeSecs) && first_press(left_key)==timeSecs
             keyresponse = 'left';
             reactionTime = timeSecs - trialStart;
-            disp(keyresponse);
-            disp(reactionTime);
             
             break;
-        elseif first_press(right_key)
+        elseif ~isempty(timeSecs) && first_press(right_key)==timeSecs
             keyresponse = 'right';
             reactionTime = timeSecs - trialStart;
-             disp(keyresponse);
-            disp(reactionTime);
             
             break;   
-            
-           elseif first_press(down_key)
+        
+        elseif ~isempty(timeSecs) && first_press(down_key)==timeSecs
             keyresponse = 'down';
             reactionTime = timeSecs - trialStart;
-             disp(keyresponse);
-            disp(reactionTime);
             
             break; 
         
@@ -827,6 +816,7 @@ Screen('Flip', scr);
 WaitSecs(0.8);
 
 % Store data in matlab structure
+if isnumeric(blockLoop)
 data.n = (blockLoop-1)*trialsNum + loop;
 data.keyresponse{data.n} = keyresponse;
 data.rt(data.n) = reactionTime;
@@ -835,7 +825,7 @@ data.targetcolor{data.n} = targetInfo;
 data.targetpos{data.n} = targetPos;
 data.displaysize(data.n) = num_items;
 data.epoch(data.n) = displayLoops;
-
+end
 
 end
 
